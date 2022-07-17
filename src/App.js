@@ -1,25 +1,30 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react'
+import { Toaster } from "react-hot-toast"
+import { Routes, Route } from "react-router-dom"
+import Signin from './pages/Signin'
+import Home from './pages/Home'
+import Login from './pages/Login'
+import Modal from './components/Modal'
+import { useSelector } from 'react-redux'
 
-function App() {
+const App = () => {
+
+  const { open, data } = useSelector(state => state.modal)
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className='bg-cyan-400 w-screen h-screen'>
+      <Toaster position='top-right' />
+      {
+        open && <Modal name={open} data={data} />
+      }
+      {/* <Modal name={open} data={data} /> */}
+
+      <Routes>
+        <Route path='/' element={<Home />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/signin' element={<Signin />} />
+      </Routes>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
