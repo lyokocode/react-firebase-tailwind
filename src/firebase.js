@@ -1,9 +1,12 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateProfile, sendEmailVerification, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { getFirestore, collection, addDoc, deleteDoc, onSnapshot, query, where, doc } from "firebase/firestore";
 import toast from "react-hot-toast"
 import store from "./store";
 import { login as loginHandle, logout as logoutHandle } from "./store/auth"
 import { openModal } from "./store/modal";
+import { setTodos } from "./store/todos";
+import { setUserData } from "./utils";
 
 const firebaseConfig = {
     // apiKey: proccess.env.REACT_APP_API_KEY,
@@ -24,6 +27,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth();
+
+export const db = getFirestore(app)
 
 export const register = async (email, password) => {
     try {
@@ -97,21 +102,39 @@ export const reAuth = async password => {
     }
 }
 
-
 onAuthStateChanged(auth, (user) => {
     if (user) {
+        setUserData();
 
-        store.dispatch(loginHandle({
-            displayName: user.displayName,
-            email: user.email,
-            emailVerified: user.emailVerified,
-            photoURL: user.photoURL,
-            uid: user.uid
-        }))
+        onSnapshot(query(collection(db, "todos"), where('uid', '==', auth.currentUser.uid)), (doc) => {
+            store.dispatch(
+                setTodos(doc.docs.reduce((todos, todo) => [...todos, { ...todo.data(), id: todo.id }], [])
+                )
+            )
+        })
+
         return true
+
     } else {
         store.dispatch(logoutHandle())
     }
 })
+
+export const addTodo = async data => {
+    try {
+        const result = await addDoc(collection(db, "todos"), data)
+        return result.id
+    } catch (error) {
+        toast.error(error.message)
+    }
+}
+
+export const deleteTodo = async id => {
+    try {
+        await deleteDoc(doc(db, "todos", id))
+    } catch (error) {
+        toast.error(error.message)
+    }
+}
 
 export default app

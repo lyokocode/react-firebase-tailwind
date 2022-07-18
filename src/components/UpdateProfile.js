@@ -1,11 +1,10 @@
 import React, { useState } from 'react'
-import { update, auth, resetPassword } from '../firebase'
-import { useDispatch, useSelector } from 'react-redux'
-import { login } from '../store/auth'
+import { update, resetPassword } from '../firebase'
+import { useSelector } from 'react-redux'
+import { setUserData } from '../utils'
 
 const UpdateProfile = () => {
 
-    const dispatch = useDispatch()
     const { user } = useSelector(state => state.auth)
     const [displayName, setDisplayName] = useState(user.displayName || "")
     const [avatar, setAvatar] = useState(user.photoURL || "")
@@ -18,13 +17,7 @@ const UpdateProfile = () => {
             displayName,
             photoURL: avatar
         })
-        dispatch(login({
-            displayName: auth.currentUser.displayName,
-            email: auth.currentUser.email,
-            emailVerified: auth.currentUser.emailVerified,
-            photoURL: auth.currentUser.photoURL,
-            uid: auth.currentUser.uid
-        }))
+        setUserData()
     }
 
     const handleResetPassword = async (e) => {
@@ -37,7 +30,8 @@ const UpdateProfile = () => {
     }
 
     return (
-        <section className='w-2/5 p-10  flex flex-col items-center justify-center absolute top-24 right-36'>
+        <section className='z-10 w-2/5 p-10 h-[70vh]  bg-indigo-300 rounded-lg flex flex-col items-center justify-center absolute top-28 right-32'>
+            <h6 className='w-full p-4 text-sm '>(Oturum ({user.email}) tarafından açıldı)</h6>
             <form onSubmit={handleSubmit} className="w-96  flex flex-col items-center justify-center m-5">
                 <h1>kullanıcı bilgilerini güncelle</h1>
                 <input className="shadow-sm focus:ring-indigo-500 rounded block w-full px-5 sm:text-sm border-gray-500"
